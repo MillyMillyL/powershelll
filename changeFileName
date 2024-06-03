@@ -4,3 +4,6 @@ Get-ChildItem | %{  ren $_.FullName ($_.Name -replace '\s','-') }
 
 ### change file name to lowercase
 Get-ChildItem -r | % { if ($_.Name -cne $_.Name.ToLower()) { ren $_.FullName $_.Name.ToLower() } }
+
+### Get all file name
+Get-ChildItem -File -Name
