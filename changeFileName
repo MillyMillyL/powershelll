@@ -7,3 +7,43 @@ Get-ChildItem -r | % { if ($_.Name -cne $_.Name.ToLower()) { ren $_.FullName $_.
 
 ### Get all file name
 Get-ChildItem -File -Name
+
+### Rename all subdirectories and files in a directory (including its subdirectories and files) by replacing a specific string in their names
+# Define the root directory
+$rootDir = "C:\Path\To\Your\Directory"
+
+# Define the string to replace and the replacement string
+$stringToReplace = "oldString"
+$replacementString = "newString"
+
+# Function to rename items
+function Rename-ItemRecursively {
+    param (
+        [string]$dir
+    )
+    
+    # Get all directories and files in the current directory
+    $items = Get-ChildItem -Path $dir -Recurse
+    
+    foreach ($item in $items) {
+        # Skip if item is not a file or directory
+        if (-not ($item.PSIsContainer -or $item -is [System.IO.FileInfo])) {
+            continue
+        }
+
+        # Construct the new name by replacing the specified string
+        $newName = $item.Name -replace [regex]::Escape($stringToReplace), $replacementString
+
+        if ($newName -ne $item.Name) {
+            # Determine the new full path
+            $newPath = Join-Path -Path $item.DirectoryName -ChildPath $newName
+            
+            # Rename the item
+            Rename-Item -Path $item.FullName -NewName $newPath
+        }
+    }
+}
+
+# Call the function to start renaming
+Rename-ItemRecursively -dir $rootDir
+
