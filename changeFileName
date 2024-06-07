@@ -52,3 +52,34 @@ function Rename-ItemRecursively {
 # Call the function to start renaming
 Rename-ItemRecursively -dir $rootDir
 
+
+### bulk rename subdirectories in PowerShell by specifying new names one by one
+
+Create a CSV file (rename-mapping.csv) with two columns: OldName and NewName. This file should look like this:
+
+csv
+OldName,NewName
+SubDir1,NewSubDir1
+SubDir2,NewSubDir2
+SubDir3,NewSubDir3
+
+Use the following PowerShell script:
+
+# Path to the CSV file containing the rename mapping
+$csvPath = ".\rename-mapping.csv"
+
+# Import the CSV file
+$renameMapping = Import-Csv -Path $csvPath
+
+# Loop through each mapping and rename the subdirectories
+foreach ($mapping in $renameMapping) {
+    $oldSubDirPath = Get-Item -Path $mapping.OldName
+    $newSubDirPath = $mapping.NewName
+
+    if (Test-Path -Path $oldSubDirPath) {
+        Rename-Item -Path $oldSubDirPath -NewName $newSubDirPath
+        Write-Output "Renamed '$($mapping.OldName)' to '$($mapping.NewName)'"
+    } else {
+        Write-Output "Directory '$($mapping.OldName)' does not exist."
+    }
+}
