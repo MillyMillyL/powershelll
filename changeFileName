@@ -5,6 +5,12 @@ Get-ChildItem | %{  ren $_.FullName ($_.Name -replace '\s','-') }
 ### change file name to lowercase
 Get-ChildItem -r | % { if ($_.Name -cne $_.Name.ToLower()) { ren $_.FullName $_.Name.ToLower() } }
 
+### rename reclusively all files with first letter upper case (ignore directory)
+Get-ChildItem -r | % { if(!((Get-Item $_.FullName) -is [System.IO.DirectoryInfo])) { ren $_.FullName ($_.Name.substring(0,1).toupper()+$_.Name.substring(1).tolower())}}
+### rename directory with first letter upper case
+Get-ChildItem | % { ren -Path $_.FullName -NewName ("A"+$_.Name.substring(0,1).toupper()+$_.Name.substring(1))}
+Get-ChildItem | % { ren -Path $_.FullName -NewName ($_.Name.substring(1))}
+
 ### Get all file name
 Get-ChildItem -File -Name
 
