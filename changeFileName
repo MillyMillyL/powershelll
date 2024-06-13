@@ -89,3 +89,70 @@ foreach ($mapping in $renameMapping) {
         Write-Output "Directory '$($mapping.OldName)' does not exist."
     }
 }
+
+
+### 通过替换修改文件夹下所有子文件的文件名
+CSV
+OldPart,NewPart
+oldPart1,newPart1
+oldPart2,newPart2
+
+
+# Path to the CSV file containing the rename mapping
+$csvPath = ".\rename-mapping.csv"
+
+# Import the CSV file
+$renameMapping = Import-Csv -Path $csvPath
+
+# Output the rename mapping for debugging
+Write-Output "Loaded rename mappings:"
+$renameMapping | ForEach-Object { Write-Output "OldPart: $($_.OldPart), NewPart: $($_.NewPart)" }
+
+# Check if CSV file is empty
+if ($renameMapping.Count -eq 0) {
+    Write-Output "No mappings found in CSV file. Please check the file format and content."
+    exit
+}
+
+# Function to replace part of file name
+function Replace-FileName {
+    param(
+        [string]$oldFileName,
+        [string]$oldPart,
+        [string]$newPart
+    )
+
+    # Replace old part in file name with new part
+    $newFileName = $oldFileName -replace [regex]::Escape($oldPart), $newPart
+    return $newFileName
+}
+
+# Get all files in the current directory and subdirectories
+$files = Get-ChildItem -Recurse -File
+
+# Output the list of files for debugging
+Write-Output "Files found in directory and subdirectories:"
+$files | ForEach-Object { Write-Output $_.FullName }
+
+# Loop through each file and each mapping to replace part of the name
+foreach ($file in $files) {
+    $oldFileName = $file.Name
+    $fileDirectory = $file.DirectoryName
+
+    foreach ($mapping in $renameMapping) {
+        $oldPart = $mapping.OldPart
+        $newPart = $mapping.NewPart
+
+        if ($oldFileName -like "*$oldPart*") {
+            $newFileName = Replace-FileName -oldFileName $oldFileName -oldPart $oldPart -newPart $newPart
+            $newFilePath = Join-Path -Path $fileDirectory -ChildPath $newFileName
+
+            # Rename the file
+            Rename-Item -Path $file.FullName -NewName $newFileName -Force
+            Write-Output "Renamed '$oldFileName' to '$newFileName'"
+            
+            # Update file object with new file name (optional)
+            $file = Get-Item -Path $newFilePath
+        }
+    }
+}
