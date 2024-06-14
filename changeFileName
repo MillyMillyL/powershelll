@@ -13,6 +13,8 @@ Get-ChildItem | % { ren -Path $_.FullName -NewName ($_.Name.substring(1))}
 
 ### Get all file name
 Get-ChildItem -File -Name
+#include files in subdirectories
+Get-ChildItem -r -File -Name
 
 ### get the paths of all the child items in a specific folder using PowerShell
 $folderPath = "C:\Your\Folder\Path"
